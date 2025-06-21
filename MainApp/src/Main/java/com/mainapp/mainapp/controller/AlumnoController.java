@@ -1,5 +1,6 @@
 package com.mainapp.mainapp.controller;
 
+import com.mainapp.mainapp.assembler.AlumnoModelAssembler;
 import com.mainapp.mainapp.entity.Alumno;
 import com.mainapp.mainapp.service.AlumnoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,9 +10,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
 @RequestMapping("/api/alumnos")
@@ -21,6 +27,9 @@ public class AlumnoController {
     @Autowired
     private AlumnoService alumnoService;
 
+    @Autowired
+    private AlumnoModelAssembler assembler;
+
     @GetMapping
     @Operation(summary = "Obtener todos los alumnos", description = "Obtiene una lista de todos los alumnos")
     @ApiResponses(value = {
@@ -28,8 +37,13 @@ public class AlumnoController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = Alumno.class)))
     })
-    public List<Alumno> getAllAlumnos() {
-        return alumnoService.findAll();
+    public CollectionModel<EntityModel<Alumno>> getAllAlumnos() {
+        List<EntityModel<Alumno>> alumnos = alumnoService.findAll().stream()
+                .map(assembler::toModel)
+                .collect(Collectors.toList());
+
+        return CollectionModel.of(alumnos,
+                linkTo(methodOn(AlumnoController.class).getAllAlumnos()).withSelfRel());
     }
 
     @GetMapping("/{id}")
@@ -40,8 +54,8 @@ public class AlumnoController {
                             schema = @Schema(implementation = Alumno.class))),
             @ApiResponse(responseCode = "404", description = "Alumno no encontrado")
     })
-    public Alumno getAlumnoById(@PathVariable Integer id) {
-        return alumnoService.findById(id);
+    public EntityModel<Alumno> getAlumnoById(@PathVariable Integer id) {
+        return assembler.toModel(alumnoService.findById(id));
     }
 
     @PostMapping
@@ -51,8 +65,9 @@ public class AlumnoController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = Alumno.class)))
     })
-    public Alumno createAlumno(@RequestBody Alumno alumno) {
-        return alumnoService.save(alumno);
+    public EntityModel<Alumno> createAlumno(@RequestBody Alumno alumno) {
+        Alumno saved = alumnoService.save(alumno);
+        return assembler.toModel(saved);
     }
 
     @PutMapping("/{id}")
@@ -63,9 +78,9 @@ public class AlumnoController {
                             schema = @Schema(implementation = Alumno.class))),
             @ApiResponse(responseCode = "404", description = "Alumno no encontrado")
     })
-    public Alumno updateAlumno(@PathVariable Integer id, @RequestBody Alumno alumno) {
+    public EntityModel<Alumno> updateAlumno(@PathVariable Integer id, @RequestBody Alumno alumno) {
         alumno.setId(id);
-        return alumnoService.save(alumno);
+        return assembler.toModel(alumnoService.save(alumno));
     }
 
     @DeleteMapping("/{id}")

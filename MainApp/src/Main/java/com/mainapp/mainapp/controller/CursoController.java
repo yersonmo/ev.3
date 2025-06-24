@@ -1,10 +1,14 @@
 package com.mainapp.mainapp.controller;
 
-import com.mainapp.mainapp.assembler.CursoModelAssembler;
 import com.mainapp.mainapp.entity.Curso;
 import com.mainapp.mainapp.service.CursoService;
-import io.swagger.v3.oas.annotations.Operation;
+import com.mainapp.mainapp.assembler.CursoModelAssembler;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -27,7 +31,10 @@ public class CursoController {
     private CursoModelAssembler assembler;
 
     @GetMapping
-    @Operation(summary = "Obtener todos los cursos")
+    @Operation(
+        summary = "Obtener todos los cursos",
+        description = "Devuelve la lista completa de cursos registrados"
+    )
     public CollectionModel<EntityModel<Curso>> getAllCursos() {
         List<EntityModel<Curso>> cursos = cursoService.findAll().stream()
                 .map(assembler::toModel)
@@ -38,27 +45,41 @@ public class CursoController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Obtener un curso por ID")
+    @Operation(
+        summary = "Obtener un curso por ID",
+        description = "Devuelve los datos de un curso específico por su ID"
+    )
     public EntityModel<Curso> getCursoById(@PathVariable Integer id) {
         return assembler.toModel(cursoService.findById(id));
     }
 
     @PostMapping
-    @Operation(summary = "Crear un nuevo curso")
-    public EntityModel<Curso> createCurso(@RequestBody Curso curso) {
-        return assembler.toModel(cursoService.save(curso));
+    @Operation(
+        summary = "Crear un nuevo curso",
+        description = "Registra un nuevo curso en el sistema"
+    )
+    public EntityModel<Curso> createCurso(@Valid @RequestBody Curso curso) {
+        Curso saved = cursoService.save(curso);
+        return assembler.toModel(saved);
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Actualizar un curso")
-    public EntityModel<Curso> updateCurso(@PathVariable Integer id, @RequestBody Curso curso) {
+    @Operation(
+        summary = "Actualizar un curso",
+        description = "Modifica los datos de un curso existente"
+    )
+    public EntityModel<Curso> updateCurso(@PathVariable Integer id, @Valid @RequestBody Curso curso) {
         curso.setId(id);
         return assembler.toModel(cursoService.save(curso));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Eliminar un curso")
+    @Operation(
+        summary = "Eliminar un curso",
+        description = "Elimina un curso por su ID"
+    )
     public void deleteCurso(@PathVariable Integer id) {
         cursoService.deleteById(id);
     }
 }
+

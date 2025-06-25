@@ -111,7 +111,7 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
-            <!-- este de aca es el que esta dando problemas en mi pc, no lo puedo abrir! -->
+            <!-- ... -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -128,28 +128,4 @@
     </build>
 </project>
 
-<!--por lo que se logra ver el lombok no se esta aplicando correctamente en mi pc
-deberia ir asi por el /EXCLUDE
-
-<build>
-    <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-                <annotationProcessorPaths>
-                    <path>
-                        <groupId>org.projectlombok</groupId>
-                        <artifactId>lombok</artifactId>
-                    </path>
-                </annotationProcessorPaths>
-            </configuration>
-        </plugin>
-        <plugin>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-        </plugin>
-    </plugins>
-</build>
-
-eso a mi parecer deberia ir asi por el /EXCLUDE
+<!--se probo de las dos formas...-->
